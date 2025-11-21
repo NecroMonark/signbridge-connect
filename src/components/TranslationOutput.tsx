@@ -1,14 +1,24 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Volume2, Languages } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 
-const TranslationOutput = () => {
-  const [detectedText, setDetectedText] = useState("Hello, how are you?");
+interface TranslationOutputProps {
+  detectedText?: string;
+}
+
+const TranslationOutput = ({ detectedText = "" }: TranslationOutputProps) => {
   const [targetLanguage, setTargetLanguage] = useState("english");
-  const [translatedText, setTranslatedText] = useState("Hello, how are you?");
+  const [translatedText, setTranslatedText] = useState("");
+
+  useEffect(() => {
+    if (detectedText) {
+      // TODO: Integrate with translation API
+      setTranslatedText(detectedText);
+    }
+  }, [detectedText]);
 
   const speak = (text: string, lang: string) => {
     if ('speechSynthesis' in window) {

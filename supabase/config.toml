@@ -1,0 +1,4 @@
+project_id = "myikezthdiotoddpiwwq"
+
+[functions.detect-gesture]
+verify_jwt = false
