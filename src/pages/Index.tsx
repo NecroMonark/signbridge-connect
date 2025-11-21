@@ -1,12 +1,32 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import Navbar from "@/components/Navbar";
+import CameraFeed from "@/components/CameraFeed";
+import TranslationOutput from "@/components/TranslationOutput";
+import AILearningChat from "@/components/AILearningChat";
 
 const Index = () => {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
+    <div className="min-h-screen bg-background">
+      <Navbar />
+      
+      <main className="container py-6 px-4 space-y-6 max-w-4xl mx-auto">
+        {/* Camera Section */}
+        <section>
+          <h2 className="text-2xl font-bold text-foreground mb-4">Live Camera Feed</h2>
+          <CameraFeed />
+        </section>
+
+        {/* Translation Section */}
+        <section>
+          <h2 className="text-2xl font-bold text-foreground mb-4">Translation</h2>
+          <TranslationOutput />
+        </section>
+
+        {/* AI Learning Section */}
+        <section>
+          <h2 className="text-2xl font-bold text-foreground mb-4">Learn Sign Language</h2>
+          <AILearningChat />
+        </section>
+      </main>
     </div>
   );
 };
