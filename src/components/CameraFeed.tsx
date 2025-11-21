@@ -3,6 +3,7 @@ import { Camera, SwitchCamera, Video, VideoOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Card } from "@/components/ui/card";
+import { supabase } from "@/integrations/supabase/client";
 
 interface CameraFeedProps {
   onGestureDetected?: (text: string) => void;
@@ -13,6 +14,8 @@ const CameraFeed = ({ onGestureDetected }: CameraFeedProps) => {
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [facingMode, setFacingMode] = useState<"user" | "environment">("user");
   const [isActive, setIsActive] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const startCamera = async () => {
     try {
@@ -62,6 +65,57 @@ const CameraFeed = ({ onGestureDetected }: CameraFeedProps) => {
     }
   }, [facingMode]);
 
+  const captureAndProcessFrame = async () => {
+    if (!videoRef.current || !canvasRef.current || !isActive || isProcessing) return;
+
+    const canvas = canvasRef.current;
+    const video = videoRef.current;
+    const context = canvas.getContext('2d');
+
+    if (!context) return;
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    // Flip horizontally if using front camera
+    if (facingMode === 'user') {
+      context.translate(canvas.width, 0);
+      context.scale(-1, 1);
+    }
+
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    
+    const frameData = canvas.toDataURL('image/jpeg', 0.8);
+
+    try {
+      setIsProcessing(true);
+      const { data, error } = await supabase.functions.invoke('detect-gesture', {
+        body: { frame: frameData }
+      });
+
+      if (error) throw error;
+
+      if (data?.detectedSign && onGestureDetected) {
+        onGestureDetected(data.detectedSign);
+        console.log('Detected sign:', data.detectedSign, 'Confidence:', data.confidence);
+      }
+    } catch (error) {
+      console.error('Error processing frame:', error);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!isActive) return;
+
+    const interval = setInterval(() => {
+      captureAndProcessFrame();
+    }, 1000); // Process frame every second
+
+    return () => clearInterval(interval);
+  }, [isActive, isProcessing]);
+
   useEffect(() => {
     return () => {
       if (stream) {
@@ -80,6 +134,7 @@ const CameraFeed = ({ onGestureDetected }: CameraFeedProps) => {
           muted
           className={`h-full w-full object-cover ${facingMode === 'user' ? 'scale-x-[-1]' : ''}`}
         />
+        <canvas ref={canvasRef} className="hidden" />
         
         {!isActive && (
           <div className="absolute inset-0 flex items-center justify-center bg-muted">
