@@ -78,7 +78,7 @@ const CameraFeed = ({ onGestureDetected }: CameraFeedProps) => {
           autoPlay
           playsInline
           muted
-          className="h-full w-full object-cover"
+          className={`h-full w-full object-cover ${facingMode === 'user' ? 'scale-x-[-1]' : ''}`}
         />
         
         {!isActive && (
