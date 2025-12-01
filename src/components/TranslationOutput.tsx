@@ -7,9 +7,10 @@ import { toast } from "sonner";
 
 interface TranslationOutputProps {
   detectedText?: string;
+  alphabetScanMode?: boolean;
 }
 
-const TranslationOutput = ({ detectedText = "" }: TranslationOutputProps) => {
+const TranslationOutput = ({ detectedText = "", alphabetScanMode = false }: TranslationOutputProps) => {
   const [targetLanguage, setTargetLanguage] = useState("english");
   const [translatedText, setTranslatedText] = useState("");
 
@@ -48,6 +49,43 @@ const TranslationOutput = ({ detectedText = "" }: TranslationOutputProps) => {
     { value: "marathi", label: "मराठी (Marathi)" },
   ];
 
+  // Alphabet scan mode - show letter card
+  if (alphabetScanMode && detectedText) {
+    return (
+      <Card className="shadow-card">
+        <CardContent className="pt-6">
+          <div className="text-center space-y-4">
+            <div className="text-8xl font-bold text-primary mb-4">
+              {detectedText}
+            </div>
+            <p className="text-lg font-medium text-foreground">
+              Detected sign: {detectedText} (ASL fingerspelling)
+            </p>
+            
+            <div className="pt-4 border-t border-border">
+              <p className="text-sm text-muted-foreground mb-3">Listen in different languages:</p>
+              <div className="flex gap-2 justify-center flex-wrap">
+                {languages.map((lang) => (
+                  <Button
+                    key={lang.value}
+                    variant="outline"
+                    size="sm"
+                    onClick={() => speak(`Letter ${detectedText}`, lang.value)}
+                    className="gap-2"
+                  >
+                    <Volume2 className="h-4 w-4" />
+                    {lang.label}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Normal phrase mode
   return (
     <div className="space-y-4">
       <Card className="shadow-card">
