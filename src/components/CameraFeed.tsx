@@ -8,9 +8,10 @@ import { supabase } from "@/integrations/supabase/client";
 interface CameraFeedProps {
   onGestureDetected?: (text: string) => void;
   alphabetScanMode?: boolean;
+  sessionId?: string | null;
 }
 
-const CameraFeed = ({ onGestureDetected, alphabetScanMode = false }: CameraFeedProps) => {
+const CameraFeed = ({ onGestureDetected, alphabetScanMode = false, sessionId }: CameraFeedProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [facingMode, setFacingMode] = useState<"user" | "environment">("user");
@@ -97,7 +98,11 @@ const CameraFeed = ({ onGestureDetected, alphabetScanMode = false }: CameraFeedP
     try {
       setIsProcessing(true);
       const { data, error } = await supabase.functions.invoke('detect-gesture', {
-        body: { frame: frameData, alphabetMode: alphabetScanMode }
+        body: { 
+          frame: frameData, 
+          alphabetMode: alphabetScanMode,
+          session_id: sessionId 
+        }
       });
 
       if (error) throw error;
@@ -188,7 +193,7 @@ const CameraFeed = ({ onGestureDetected, alphabetScanMode = false }: CameraFeedP
     }, frameRate);
 
     return () => clearInterval(interval);
-  }, [isActive, isProcessing, alphabetScanMode, lockedLetter]);
+  }, [isActive, isProcessing, alphabetScanMode, lockedLetter, sessionId]);
 
   useEffect(() => {
     return () => {

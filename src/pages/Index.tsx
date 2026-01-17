@@ -3,10 +3,14 @@ import Navbar from "@/components/Navbar";
 import CameraFeed from "@/components/CameraFeed";
 import TranslationOutput from "@/components/TranslationOutput";
 import AILearningChat from "@/components/AILearningChat";
+import { useSession } from "@/hooks/useSession";
+import { Badge } from "@/components/ui/badge";
+import { Activity, Clock } from "lucide-react";
 
 const Index = () => {
   const [detectedText, setDetectedText] = useState("");
   const [alphabetScanMode, setAlphabetScanMode] = useState(false);
+  const { sessionId, stats, isLoading: sessionLoading } = useSession();
 
   const handleGestureDetected = (text: string) => {
     setDetectedText(text);
@@ -17,6 +21,25 @@ const Index = () => {
       <Navbar />
       
       <main className="container py-6 px-4 space-y-6 max-w-4xl mx-auto">
+        {/* Session Stats Bar */}
+        {!sessionLoading && stats && (
+          <section className="flex items-center gap-4 p-3 bg-muted/50 rounded-lg border border-border">
+            <Badge variant="outline" className="gap-1">
+              <Activity className="h-3 w-3" />
+              {stats.total_gestures} gestures
+            </Badge>
+            <Badge variant="outline" className="gap-1">
+              <Clock className="h-3 w-3" />
+              {stats.session_duration_minutes} min
+            </Badge>
+            {stats.recent_letters.length > 0 && (
+              <div className="flex-1 text-sm text-muted-foreground truncate">
+                Recent: {stats.recent_letters.slice(0, 10).join(', ')}
+              </div>
+            )}
+          </section>
+        )}
+
         {/* Alphabet Scan Mode Toggle */}
         <section className="flex items-center justify-between p-4 bg-card rounded-lg shadow-card border border-border">
           <div>
@@ -40,6 +63,7 @@ const Index = () => {
           <CameraFeed 
             onGestureDetected={handleGestureDetected} 
             alphabetScanMode={alphabetScanMode}
+            sessionId={sessionId}
           />
         </section>
 
@@ -51,6 +75,7 @@ const Index = () => {
           <TranslationOutput 
             detectedText={detectedText} 
             alphabetScanMode={alphabetScanMode}
+            sessionId={sessionId}
           />
         </section>
 

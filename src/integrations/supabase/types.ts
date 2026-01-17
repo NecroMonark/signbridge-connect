@@ -14,7 +14,93 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      gesture_logs: {
+        Row: {
+          confidence: number
+          created_at: string | null
+          detected_gesture: string
+          id: string
+          is_stable: boolean | null
+          mode: string | null
+          session_id: string
+        }
+        Insert: {
+          confidence?: number
+          created_at?: string | null
+          detected_gesture: string
+          id?: string
+          is_stable?: boolean | null
+          mode?: string | null
+          session_id: string
+        }
+        Update: {
+          confidence?: number
+          created_at?: string | null
+          detected_gesture?: string
+          id?: string
+          is_stable?: boolean | null
+          mode?: string | null
+          session_id?: string
+        }
+        Relationships: []
+      }
+      translation_history: {
+        Row: {
+          created_at: string | null
+          id: string
+          original_text: string
+          session_id: string | null
+          source_language: string
+          target_language: string
+          translated_text: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          original_text: string
+          session_id?: string | null
+          source_language?: string
+          target_language: string
+          translated_text: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          original_text?: string
+          session_id?: string | null
+          source_language?: string
+          target_language?: string
+          translated_text?: string
+        }
+        Relationships: []
+      }
+      user_sessions: {
+        Row: {
+          id: string
+          is_active: boolean | null
+          last_active_at: string | null
+          session_token: string
+          started_at: string | null
+          total_gestures_detected: number | null
+        }
+        Insert: {
+          id?: string
+          is_active?: boolean | null
+          last_active_at?: string | null
+          session_token: string
+          started_at?: string | null
+          total_gestures_detected?: number | null
+        }
+        Update: {
+          id?: string
+          is_active?: boolean | null
+          last_active_at?: string | null
+          session_token?: string
+          started_at?: string | null
+          total_gestures_detected?: number | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
