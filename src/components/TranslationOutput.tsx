@@ -1,18 +1,21 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Volume2, Languages } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 interface TranslationOutputProps {
   detectedText?: string;
   alphabetScanMode?: boolean;
+  sessionId?: string | null;
 }
 
-const TranslationOutput = ({ detectedText = "", alphabetScanMode = false }: TranslationOutputProps) => {
+const TranslationOutput = ({ detectedText = "", alphabetScanMode = false, sessionId }: TranslationOutputProps) => {
   const [targetLanguage, setTargetLanguage] = useState("english");
   const [translatedText, setTranslatedText] = useState("");
+  const lastLoggedRef = useRef<string>("");
 
   useEffect(() => {
     if (detectedText) {
@@ -20,6 +23,40 @@ const TranslationOutput = ({ detectedText = "", alphabetScanMode = false }: Tran
       setTranslatedText(detectedText);
     }
   }, [detectedText]);
+
+  // Log translation when language changes or new text is detected
+  useEffect(() => {
+    const logTranslation = async () => {
+      if (!detectedText || !translatedText || alphabetScanMode) return;
+      
+      // Avoid duplicate logs
+      const logKey = `${detectedText}-${targetLanguage}`;
+      if (logKey === lastLoggedRef.current) return;
+      
+      try {
+        const { error } = await supabase.functions.invoke('log-translation', {
+          body: {
+            session_id: sessionId,
+            original_text: detectedText,
+            source_language: 'asl',
+            target_language: targetLanguage,
+            translated_text: translatedText
+          }
+        });
+
+        if (error) {
+          console.error('Error logging translation:', error);
+        } else {
+          lastLoggedRef.current = logKey;
+          console.log('Translation logged successfully');
+        }
+      } catch (err) {
+        console.error('Failed to log translation:', err);
+      }
+    };
+
+    logTranslation();
+  }, [detectedText, translatedText, targetLanguage, sessionId, alphabetScanMode]);
 
   const speak = (text: string, lang: string) => {
     if ('speechSynthesis' in window) {
